@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biznet Blimbing</title>
+
+<style>
+:root {
+    --bg: #0b1220;
+    --card: #111a2e;
+    --text: #e6edf7;
+    --accent: #3b82f6;
+    --border: rgba(255,255,255,0.08);
+}
+
+.light {
+    --bg: #ffffff;
+    --card: #f3f6fb;
+    --text: #0b1220;
+    --accent: #2563eb;
+    --border: rgba(0,0,0,0.1);
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, Arial;
+    background: var(--bg);
+    color: var(--text);
+    padding: 16px;
+    transition: 0.3s;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.header a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.switch {
+    width: 46px;
+    height: 24px;
+    background: #222;
+    border-radius: 50px;
+    position: relative;
+    cursor: pointer;
+}
+
+.switch::after {
+    content: "";
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: 0.3s;
+}
+
+.light .switch {
+    background: #ddd;
+}
+
+.light .switch::after {
+    left: 25px;
+    background: black;
+}
+
+button {
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    color: white;
+    background: var(--accent);
+    margin-top: 5px;
+}
+
+.top-tools {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.small-btn {
+    flex: 1;
+    padding: 8px;
+    font-size: 12px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+.danger { background:#ef4444; color:white; }
+.gray { background:#64748b; color:white; }
+
+textarea {
+    width: 100%;
+    height: 130px;
+    border-radius: 10px;
+    border: none;
+    padding: 10px;
+    background: var(--card);
+    color: var(--text);
+    outline: none;
+}
+
+.card {
+    background: var(--card);
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    border-left: 3px solid var(--accent);
+}
+
+.form {
+    margin-top: 10px;
+    background: var(--card);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+input, select {
+    width: 100%;
+    margin: 5px 0;
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255,255,255,0.05);
+    color: var(--text);
+}
+
+/* INSTALLER */
+.installer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin: 6px 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.02);
+    transition: 0.2s;
+}
+
+.installer-row:hover {
+    border-color: var(--accent);
+}
+
+.installer-row.active {
+    border-color: var(--accent);
+    background: rgba(59,130,246,0.15);
+}
+
+pre {
+    background: #000;
+    color: #00ff88;
+    padding: 10px;
+    border-radius: 10px;
+    overflow-x: auto;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+
+<a href="https://app.biznet.id/" target="_blank">
+    <div style="background:#fff;padding:7px;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+        <img src="https://i.pinimg.com/originals/9e/7c/9d/9e7c9d42fa90f23ae7c89d42bc5c4c5f.gif"
+             style="width:36px;height:36px;">
+    </div>
+    <div style="font-weight:600;font-size:18px;">Biznet Blimbing</div>
+</a>
+
+<div class="switch" onclick="toggleTheme()"></div>
+
+</div>
+
+<div class="top-tools">
+<button class="small-btn danger" onclick="clearInput()">Hapus Paste</button>
+<button class="small-btn gray" onclick="selectAllText()">Pilih Semua</button>
+</div>
+
+<textarea id="input" placeholder="Paste jadwal di sini..."></textarea>
+
+<button onclick="parseData()">Parse Jadwal</button>
+
+<div id="list"></div>
+
+<div class="form" id="form" style="display:none;">
+<h3>Edit Data</h3>
+
+<input id="wo" placeholder="WO">
+<input id="brim" placeholder="BRIM ID">
+<input id="sn" placeholder="MODEM SN">
+<input id="modem" placeholder="BUY / RENT">
+
+<select id="dp_mode" onchange="toggleDPInput()">
+    <option value="1">1 - pakai KODE DP WO</option>
+    <option value="2">2 - manual KODE DP REAL</option>
+</select>
+
+<input id="dp_real" placeholder="KODE DP REAL (manual)" style="display:none;">
+
+<input id="port" placeholder="PORT (16/...)">
+<input id="output" placeholder="OUTPUT DP">
+<input id="redaman" placeholder="REDAMAN">
+
+<!-- INSTALLER -->
+<div style="margin-top:8px;">
+    <div style="margin-bottom:5px;">NAMA INSTALLER</div>
+
+    <div class="installer-row" onclick="selectInstaller('Toyib')" id="ins-Toyib">
+        <span>Toyib</span>
+    </div>
+
+    <div class="installer-row" onclick="selectInstaller('Luqman')" id="ins-Luqman">
+        <span>Luqman</span>
+    </div>
+
+    <div class="installer-row" onclick="selectInstaller('Manto')" id="ins-Manto">
+        <span>Manto</span>
+    </div>
+</div>
+
+<button onclick="generate()">Generate</button>
+</div>
+
+<h3>Hasil</h3>
+
+<button onclick="sendWA()" style="background:#25D366;">KIRIM KE WHATSAPP</button>
+
+<pre id="result"></pre>
+
+<script>
+let dataList = [];
+let selected = null;
+let selectedInstaller = [];
+
+/* THEME */
+if(localStorage.getItem("theme") === "light"){
+    document.body.classList.add("light");
+}
+
+function toggleTheme(){
+    document.body.classList.toggle("light");
+    localStorage.setItem("theme",
+        document.body.classList.contains("light") ? "light" : "dark"
+    );
+}
+
+/* INPUT */
+function clearInput(){
+    document.getElementById("input").value = "";
+}
+
+function selectAllText(){
+    let el = document.getElementById("input");
+    el.focus();
+    el.select();
+}
+
+/* DP */
+function toggleDPInput(){
+    let mode = document.getElementById("dp_mode").value;
+    document.getElementById("dp_real").style.display =
+        (mode == "2") ? "block" : "none";
+}
+
+/* INSTALLER CLICK */
+function selectInstaller(name){
+    let el = document.getElementById("ins-" + name);
+
+    if(selectedInstaller.includes(name)){
+        selectedInstaller = selectedInstaller.filter(x => x !== name);
+        el.classList.remove("active");
+    } else {
+        selectedInstaller.push(name);
+        el.classList.add("active");
+    }
+}
+
+/* PARSE */
+function parseData(){
+    let text = document.getElementById("input").value;
+    let blocks = text.split(/\n\d+\.\s/).slice(1);
+
+    dataList = blocks.map((b,i)=>{
+        let parts = b.split(" - ");
+        return {
+            nama: parts[0] || "",
+            alamat: parts[1] || "",
+            hp: parts[2] || "",
+            sales: (b.match(/\(([^)]+)\)/) || [,""])[1],
+            tikor: (b.match(/https?:\/\/\S+/) || [""])[0],
+            kode_dp: (b.match(/\(([A-Z]{2,}\d+)\)/) || [,""])[1],
+            layanan: (b.match(/Home\s[\w\s+]+/i) || [""])[0],
+            panjang: (b.match(/(\d+M)/) || [""])[0],
+            index: i+1
+        };
+    });
+
+    renderList();
+}
+
+/* LIST */
+function renderList(){
+    let html = "";
+    dataList.forEach((d)=>{
+        html += `<div class="card" onclick="selectData(${d.index-1})">
+        WORK ${d.index}<br>
+        👤 ${d.nama}<br>
+        📍 ${d.alamat}
+        </div>`;
+    });
+    document.getElementById("list").innerHTML = html;
+}
+
+function selectData(i){
+    selected = dataList[i];
+    document.getElementById("form").style.display = "block";
+}
+
+/* GENERATE */
+function generate(){
+    let port = "16/" + document.getElementById("port").value;
+
+    let dp_mode = document.getElementById("dp_mode").value;
+    let kode_dp_real =
+        dp_mode == "1"
+        ? selected.kode_dp
+        : document.getElementById("dp_real").value;
+
+    let installerList = selectedInstaller.join("-");
+    if(!installerList) installerList = "-";
+
+    let res = `
+DONE ***
+${new Date().toLocaleDateString()}
+
+NAMA : ${selected.nama}
+ALAMAT : ${selected.alamat}
+Tikor Pelanggan : ${selected.tikor}
+
+NOMORPIC : ${selected.hp}
+SALES : ${selected.sales}
+WO : ${document.getElementById("wo").value}
+BRIM ID : ${document.getElementById("brim").value}
+MODEM SN : ${document.getElementById("sn").value}
+
+Modem BUY / RENT : ${document.getElementById("modem").value}
+LAYANAN : ${selected.layanan}
+KODE DP WO : ${selected.kode_dp}
+KODE DP REAL : ${kode_dp_real}
+PORT YANG DIINSTAL : ${port}
+OUTPUT DP : ${document.getElementById("output").value}
+REDAMAN ONT DISISTEM ONT : ${document.getElementById("redaman").value}
+PANJANG TARIKAN : ${selected.panjang}
+NAMA INSTALLER : ${installerList}
+
+TERIMAKASIH BRACH BLIMBING
+`;
+
+    document.getElementById("result").textContent = res;
+}
+
+/* WHATSAPP */
+function sendWA(){
+    let text = document.getElementById("result").textContent;
+
+    if(!text){
+        alert("Belum ada hasil!");
+        return;
+    }
+
+    let url = "https://wa.me/?text=" + encodeURIComponent(text);
+    window.open(url, "_blank");
+}
+</script>
+
+</body>
+</html>
